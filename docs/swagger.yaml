@@ -1,0 +1,103 @@
+definitions:
+  dto.MessageRequestDto:
+    properties:
+      message:
+        $ref: '#/definitions/model.AmqpMessage'
+      routing:
+        type: string
+    type: object
+  model.AmqpMessage:
+    properties:
+      dead: {}
+      id:
+        type: integer
+      message:
+        type: integer
+      routing:
+        type: string
+    type: object
+  model.Message:
+    properties:
+      created_at:
+        type: string
+      dead:
+        type: boolean
+      id:
+        type: integer
+      message:
+        $ref: '#/definitions/model.AmqpMessage'
+      routing:
+        type: string
+    type: object
+  v1.MessageRoutes:
+    type: object
+  v1.errorResponse:
+    properties:
+      message:
+        type: string
+      statusCode:
+        type: integer
+    type: object
+  v1.messageResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/model.Message'
+        type: array
+    type: object
+info:
+  contact: {}
+paths:
+  /api/v1/messages:
+    get:
+      consumes:
+      - application/json
+      description: Message
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.messageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+      summary: Список элементов "Сообщение"
+      tags:
+      - Message / Сообщение
+    post:
+      consumes:
+      - application/json
+      description: Message
+      parameters:
+      - description: messages
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.MessageRequestDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/v1.MessageRoutes'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+      summary: Создание элемента "Сообщение"
+      tags:
+      - Message / Сообщение
+swagger: "2.0"

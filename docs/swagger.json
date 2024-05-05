@@ -1,0 +1,160 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {}
+    },
+    "paths": {
+        "/api/v1/messages": {
+            "get": {
+                "description": "Message",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Message / Сообщение"
+                ],
+                "summary": "Список элементов \"Сообщение\"",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.messageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v1.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.errorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Message",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Message / Сообщение"
+                ],
+                "summary": "Создание элемента \"Сообщение\"",
+                "parameters": [
+                    {
+                        "description": "messages",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.MessageRequestDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/v1.MessageRoutes"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v1.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.errorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "dto.MessageRequestDto": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "$ref": "#/definitions/model.AmqpMessage"
+                },
+                "routing": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.AmqpMessage": {
+            "type": "object",
+            "properties": {
+                "dead": {},
+                "id": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "integer"
+                },
+                "routing": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.Message": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "dead": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "message": {
+                    "$ref": "#/definitions/model.AmqpMessage"
+                },
+                "routing": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1.MessageRoutes": {
+            "type": "object"
+        },
+        "v1.errorResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "statusCode": {
+                    "type": "integer"
+                }
+            }
+        },
+        "v1.messageResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Message"
+                    }
+                }
+            }
+        }
+    }
+}
