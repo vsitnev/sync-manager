@@ -13,5 +13,6 @@ CREATE TABLE IF NOT EXISTS exchange."message" (
     routing VARCHAR(128) NOT NULL,
     "message" jsonb NOT NULL,
     dead BOOLEAN NOT NULL DEFAULT false,
+    retried BOOLEAN NOT NULL DEFAULT false,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );

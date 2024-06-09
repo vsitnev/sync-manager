@@ -25,9 +25,36 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Message / Сообщение"
+                    "Messages / Сообщения"
                 ],
                 "summary": "Список элементов \"Сообщение\"",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "routing",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "sort_type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "source",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -58,7 +85,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Message / Сообщение"
+                    "Messages / Сообщения"
                 ],
                 "summary": "Создание элемента \"Сообщение\"",
                 "parameters": [
@@ -68,7 +95,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.MessageRequestDto"
+                            "$ref": "#/definitions/v1.messageCreateRequestDto"
                         }
                     }
                 ],
@@ -76,7 +103,51 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/v1.MessageRoutes"
+                            "$ref": "#/definitions/v1.messageCreateResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v1.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/messages/{id}": {
+            "get": {
+                "description": "Сообщение",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Messages / Сообщения"
+                ],
+                "summary": "Получение элемента \"Сообщение\" по id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Message ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Message"
                         }
                     },
                     "400": {
@@ -96,28 +167,27 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "dto.MessageRequestDto": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "$ref": "#/definitions/model.AmqpMessage"
-                },
-                "routing": {
-                    "type": "string"
-                }
-            }
-        },
         "model.AmqpMessage": {
             "type": "object",
+            "required": [
+                "created",
+                "data",
+                "message_id",
+                "operation",
+                "source"
+            ],
             "properties": {
-                "dead": {},
-                "id": {
+                "created": {
                     "type": "integer"
                 },
-                "message": {
-                    "type": "integer"
+                "data": {},
+                "message_id": {
+                    "type": "string"
                 },
-                "routing": {
+                "operation": {
+                    "type": "string"
+                },
+                "source": {
                     "type": "string"
                 }
             }
@@ -137,13 +207,13 @@ const docTemplate = `{
                 "message": {
                     "$ref": "#/definitions/model.AmqpMessage"
                 },
+                "retried": {
+                    "type": "boolean"
+                },
                 "routing": {
                     "type": "string"
                 }
             }
-        },
-        "v1.MessageRoutes": {
-            "type": "object"
         },
         "v1.errorResponse": {
             "type": "object",
@@ -152,6 +222,29 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "statusCode": {
+                    "type": "integer"
+                }
+            }
+        },
+        "v1.messageCreateRequestDto": {
+            "type": "object",
+            "required": [
+                "message",
+                "routing"
+            ],
+            "properties": {
+                "message": {
+                    "$ref": "#/definitions/model.AmqpMessage"
+                },
+                "routing": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1.messageCreateResponseDto": {
+            "type": "object",
+            "properties": {
+                "id": {
                     "type": "integer"
                 }
             }

@@ -1,20 +1,21 @@
 definitions:
-  dto.MessageRequestDto:
-    properties:
-      message:
-        $ref: '#/definitions/model.AmqpMessage'
-      routing:
-        type: string
-    type: object
   model.AmqpMessage:
     properties:
-      dead: {}
-      id:
+      created:
         type: integer
-      message:
-        type: integer
-      routing:
+      data: {}
+      message_id:
         type: string
+      operation:
+        type: string
+      source:
+        type: string
+    required:
+    - created
+    - data
+    - message_id
+    - operation
+    - source
     type: object
   model.Message:
     properties:
@@ -26,16 +27,31 @@ definitions:
         type: integer
       message:
         $ref: '#/definitions/model.AmqpMessage'
+      retried:
+        type: boolean
       routing:
         type: string
-    type: object
-  v1.MessageRoutes:
     type: object
   v1.errorResponse:
     properties:
       message:
         type: string
       statusCode:
+        type: integer
+    type: object
+  v1.messageCreateRequestDto:
+    properties:
+      message:
+        $ref: '#/definitions/model.AmqpMessage'
+      routing:
+        type: string
+    required:
+    - message
+    - routing
+    type: object
+  v1.messageCreateResponseDto:
+    properties:
+      id:
         type: integer
     type: object
   v1.messageResponse:
@@ -53,6 +69,22 @@ paths:
       consumes:
       - application/json
       description: Message
+      parameters:
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - in: query
+        name: routing
+        type: string
+      - in: query
+        name: sort_type
+        type: string
+      - in: query
+        name: source
+        type: string
       produces:
       - application/json
       responses:
@@ -70,7 +102,7 @@ paths:
             $ref: '#/definitions/v1.errorResponse'
       summary: Список элементов "Сообщение"
       tags:
-      - Message / Сообщение
+      - Messages / Сообщения
     post:
       consumes:
       - application/json
@@ -81,14 +113,14 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/dto.MessageRequestDto'
+          $ref: '#/definitions/v1.messageCreateRequestDto'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/v1.MessageRoutes'
+            $ref: '#/definitions/v1.messageCreateResponseDto'
         "400":
           description: Bad Request
           schema:
@@ -99,5 +131,34 @@ paths:
             $ref: '#/definitions/v1.errorResponse'
       summary: Создание элемента "Сообщение"
       tags:
-      - Message / Сообщение
+      - Messages / Сообщения
+  /api/v1/messages/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Сообщение
+      parameters:
+      - description: Message ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Message'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+      summary: Получение элемента "Сообщение" по id
+      tags:
+      - Messages / Сообщения
 swagger: "2.0"

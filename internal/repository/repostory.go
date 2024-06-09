@@ -8,12 +8,11 @@ import (
 	"github.com/vsitnev/sync-manager/pkg/postgres"
 )
 
-
 type Message interface {
 	SaveMessage(ctx context.Context, message model.Message) (int, error)
-	GetMessages(ctx context.Context) ([]model.Message, error)
+	GetMessagesPagination(ctx context.Context, source, routing string, sortType string, offset int, limit int) ([]model.Message, error)
+	GetMessageByID(ctx context.Context, ID int) (model.Message, error)
 }
-
 
 type Repositories struct {
 	Message
