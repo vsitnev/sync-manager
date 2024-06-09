@@ -22,7 +22,7 @@ type (
 
 	HTTP struct {
 		Host string `env:"HTTP_HOST"`
-		Port int    `env:"HTTP_PORT"`
+		Port string  `env:"HTTP_PORT"`
 	}
 
 	Log struct {
@@ -30,8 +30,8 @@ type (
 	}
 
 	DSN struct {
-		Database string `env:"DSN_DATABASE"`
-		Amqp     string `env:"DSN_AMQP"`
+		Database string `env:"PG_URL"`
+		Amqp     string `env:"AMQP_URL"`
 	}
 )
 
