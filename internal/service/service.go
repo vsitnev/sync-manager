@@ -2,10 +2,9 @@ package service
 
 import (
 	"context"
-
 	"github.com/vsitnev/sync-manager/internal/model"
 	"github.com/vsitnev/sync-manager/internal/repository"
-	"github.com/vsitnev/sync-manager/pkg/amqp"
+	"github.com/vsitnev/sync-manager/pkg/amqpclient"
 )
 
 type MessageInput struct {
@@ -22,17 +21,23 @@ type Message interface {
 	GetMessageByID(ctx context.Context, ID int) (model.Message, error)
 }
 
+type AmqpMessage interface {
+	SaveFromAmqp(ctx context.Context, message model.AmqpMessage) error
+}
+
 type ServiceDeps struct {
 	Reps *repository.Repositories
-	Amqp *amqp.Amqp
+	Amqp *amqpclient.Amqp
 }
 
 type Services struct {
-	Message Message
+	Message     Message
+	AmqpMessage AmqpMessage
 }
 
 func NewServices(deps ServiceDeps) *Services {
 	return &Services{
-		Message: NewMessageService(deps.Reps, deps.Amqp),
+		Message:     NewMessageService(deps.Reps, deps.Amqp),
+		AmqpMessage: NewAmqpMessageService(deps.Reps),
 	}
 }

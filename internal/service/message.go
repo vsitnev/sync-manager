@@ -5,15 +5,15 @@ import (
 
 	"github.com/vsitnev/sync-manager/internal/model"
 	"github.com/vsitnev/sync-manager/internal/repository"
-	"github.com/vsitnev/sync-manager/pkg/amqp"
+	"github.com/vsitnev/sync-manager/pkg/amqpclient"
 )
 
 type MessageService struct {
 	repo repository.Message
-	amqp *amqp.Amqp
+	amqp *amqpclient.Amqp
 }
 
-func NewMessageService(repo repository.Message, amqp *amqp.Amqp) *MessageService {
+func NewMessageService(repo repository.Message, amqp *amqpclient.Amqp) *MessageService {
 	return &MessageService{
 		repo: repo,
 	}
