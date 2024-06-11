@@ -1,6 +1,7 @@
 package app
 
 import (
+	amqp "github.com/vsitnev/sync-manager/internal/transport/amqp/consumer"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -11,7 +12,7 @@ import (
 	"github.com/vsitnev/sync-manager/internal/repository"
 	"github.com/vsitnev/sync-manager/internal/service"
 	v1 "github.com/vsitnev/sync-manager/internal/transport/http/v1"
-	"github.com/vsitnev/sync-manager/pkg/amqp"
+	"github.com/vsitnev/sync-manager/pkg/amqpclient"
 	"github.com/vsitnev/sync-manager/pkg/httpserver"
 	"github.com/vsitnev/sync-manager/pkg/postgres"
 )
@@ -40,10 +41,20 @@ func Run() {
 		return
 	}
 
-	// init amqp
-	amqp, err := amqp.New(cfg.DSN.Amqp)
+	// init amqpclient
+	exchange := amqpclient.Exchange{
+		Name: "navi.exc",
+		Routes: map[amqpclient.RoutingKey]amqpclient.Queue{
+			"navi.sync": "navi.sync",
+		},
+	}
+	amqpClient, err := amqpclient.New(amqpclient.Config{
+		Url:           cfg.DSN.Amqp,
+		Exchanges:     []amqpclient.Exchange{exchange},
+		PrefetchCount: 5,
+	})
 	if err != nil {
-		slog.Error("app - Run - amqp.New: %w", err)
+		slog.Error("app - Run - amqpclient.New: %w", err)
 		return
 	}
 
@@ -53,8 +64,15 @@ func Run() {
 	// init services
 	services := service.NewServices(service.ServiceDeps{
 		Reps: reps,
-		Amqp: amqp,
+		Amqp: amqpClient,
 	})
+
+	// amqp handler
+	err = amqp.StartConsumers(amqpClient, services)
+	if err != nil {
+		slog.Error("app - Run - amqp.StartConsumers: %w", err)
+		return
+	}
 
 	// gin handler
 	handler := gin.New()
@@ -82,5 +100,9 @@ func Run() {
 	err = httpServer.Shutdown()
 	if err != nil {
 		slog.Error("app - Run - httpServer.Shutdown: %w", err)
+	}
+	err = amqpClient.Close()
+	if err != nil {
+		slog.Error("app - Run - amqpClient.Close: %w", err)
 	}
 }

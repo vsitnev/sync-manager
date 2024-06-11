@@ -28,8 +28,6 @@ func NewMessageRepo(db *postgres.Postgres) *MessageRepo {
 }
 
 func (r *MessageRepo) SaveMessage(ctx context.Context, message model.Message) (int, error) {
-	fmt.Println(message.Message)
-
 	sql, args, _ := r.Builder.Insert("exchange.message").
 		Columns("routing", "message", "dead", "retried", "created_at").
 		Values(message.Routing, message.Message, message.Dead, message.Retried, time.Now()).
