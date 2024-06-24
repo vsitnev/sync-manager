@@ -51,7 +51,7 @@ func Run() {
 	amqpClient, err := amqpclient.New(amqpclient.Config{
 		Url:           cfg.DSN.Amqp,
 		Exchanges:     []amqpclient.Exchange{exchange},
-		PrefetchCount: 5,
+		PrefetchCount: 0,
 	})
 	if err != nil {
 		slog.Error("app - Run - amqpclient.New: %w", err)

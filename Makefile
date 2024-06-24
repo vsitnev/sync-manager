@@ -14,7 +14,7 @@ compose-down: ### Down docker-compose
 .PHONY: compose-down
 
 docker-rm-volume: ### remove docker volume
-	docker volume rm pg-data
+	docker volume rm sync-manager-db
 .PHONY: docker-rm-volume
 
 linter-golangci: ### check by golangci linter
@@ -59,4 +59,4 @@ mockgen: ### generate mock
 .PHONY: mockgen
 
 swag: ### generate swagger docs
-	swag init -g internal/app/app.go --parseInternal --parseDependency
+	swag init -g ./cmd/app/main.go

@@ -1,20 +1,20 @@
 version: "3.8"
 
 services:
-  app:
-    container_name: sync-manager-app
-    build: .
-    volumes:
-      - ./logs:/logs
-      - ./secrets:/secrets
-    env_file:
-      - .env
-    ports:
-      - "${HTTP_PORT}:${HTTP_PORT}"
-    depends_on:
-      - db
-      - rabbitmq
-    restart: on-failure
+#  app:
+#    container_name: sync-manager-app
+#    build: .
+#    volumes:
+#      - ./logs:/logs
+#      - ./secrets:/secrets
+#    env_file:
+#      - .env
+#    ports:
+#      - "${HTTP_PORT}:${HTTP_PORT}"
+#    depends_on:
+#      - db
+#      - rabbitmq
+#    restart: on-failure
 
   db:
     container_name: sync-manager-db

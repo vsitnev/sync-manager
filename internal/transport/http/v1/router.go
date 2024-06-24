@@ -24,5 +24,6 @@ func NewRouter(handler *gin.Engine, services *service.Services) {
 	v1 := handler.Group("/api/v1") // <--- you can set auth middleware here
 	{
 		newMessageRoutes(v1.Group("/messages"), services.Message)
+		newSourceRoutes(v1.Group("/sources"), services.Source)
 	}
 }
