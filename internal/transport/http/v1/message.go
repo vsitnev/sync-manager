@@ -2,6 +2,7 @@ package v1
 
 import (
 	"errors"
+	"github.com/vsitnev/sync-manager/internal/dto"
 	"github.com/vsitnev/sync-manager/internal/repository/repoerr"
 	"net/http"
 	"strconv"
@@ -28,9 +29,6 @@ type messageCreateRequestDto struct {
 	Routing string            `json:"routing" binding:"required"`
 	Message model.AmqpMessage `json:"message" binding:"required"`
 }
-type messageCreateResponseDto struct {
-	Id int `json:"id"`
-}
 
 // @Summary Создание элемента "Сообщение"
 // @Description Message
@@ -38,7 +36,7 @@ type messageCreateResponseDto struct {
 // @Accept json
 // @Produce json
 // @Param input body messageCreateRequestDto true "messages"
-// @Success 201 {object} messageCreateResponseDto
+// @Success 201 {object} service.SendMessageResponse
 // @Failure 400 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Router /api/v1/messages [post]
@@ -50,22 +48,24 @@ func (r *MessageRoutes) sendMessage(c *gin.Context) {
 		return
 	}
 
-	id, err := r.service.SendMessage(c.Request.Context(), model.Message{
+	res, err := r.service.SendMessage(c.Request.Context(), model.Message{
 		Routing: input.Routing,
 		Message: input.Message,
 	})
 	if err != nil {
+		if errors.Is(err, service.ErrRouteUrlNotFound) {
+			newErrorResponse(c, http.StatusBadRequest, err.Error())
+			return
+		}
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, messageCreateResponseDto{
-		Id: id,
-	})
+	c.JSON(http.StatusOK, res)
 }
 
 type messageResponse struct {
-	Data []model.Message `json:"data"`
+	Data []dto.Message `json:"data"`
 }
 
 type messageInput struct {
@@ -94,11 +94,13 @@ func (r *MessageRoutes) getMessages(c *gin.Context) {
 	}
 
 	data, err := r.service.GetMessages(c.Request.Context(), service.MessageInput{
-		Source:   input.Source,
-		Routing:  input.Routing,
-		SortType: input.SortType,
-		Limit:    input.Limit,
-		Offset:   input.Offset,
+		Source:  input.Source,
+		Routing: input.Routing,
+		PaginationFilter: service.PaginationFilter{
+			SortType: input.SortType,
+			Limit:    input.Limit,
+			Offset:   input.Offset,
+		},
 	})
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
@@ -106,7 +108,7 @@ func (r *MessageRoutes) getMessages(c *gin.Context) {
 	}
 
 	if len(data) == 0 {
-		data = []model.Message{}
+		data = []dto.Message{}
 	}
 	c.JSON(http.StatusOK, messageResponse{
 		Data: data,
@@ -119,7 +121,7 @@ func (r *MessageRoutes) getMessages(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "Message ID"
-// @Success 200 {object} model.Message
+// @Success 200 {object} dto.Message
 // @Failure 400 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Router /api/v1/messages/{id} [get]

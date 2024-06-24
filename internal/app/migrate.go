@@ -2,6 +2,7 @@ package app
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"log/slog"
 	"os"
@@ -23,6 +24,7 @@ func init() {
 	if !ok || len(databaseURL) == 0 {
 		log.Fatalf("migrate: environment variable not declared: PG_URL")
 	}
+	fmt.Println("START TO MIGRAGE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 	//postgres://postgres:qwerty@localhost:5436/postgres?sslmode=disable
 
 	databaseURL += "?sslmode=disable"
@@ -34,13 +36,13 @@ func init() {
 	)
 
 	for attempts > 0 {
-		slog.Info("Db url: %s",databaseURL)
+		fmt.Printf("Db url: %s\n", databaseURL)
 		m, err = migrate.New("file://migrations", databaseURL)
 		if err == nil {
 			break
 		}
 
-		slog.Info("Migrate: pgdb is trying to connect, attempts left: %d", attempts)
+		fmt.Printf("Migrate: pgdb is trying to connect, attempts left: %d\n", attempts)
 		time.Sleep(defaultTimeout)
 		attempts--
 	}

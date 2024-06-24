@@ -3,7 +3,6 @@ package amqpclient
 import (
 	"context"
 	"fmt"
-	"log/slog"
 	"time"
 
 	"github.com/rabbitmq/amqp091-go"
@@ -41,12 +40,7 @@ func New(conf Config) (*Amqp, error) {
 			if err != nil {
 				return nil, fmt.Errorf("amqpclient - New - ch.Qos: %w", err)
 			}
-			//if conf.Exchanges != nil {
-			//	err = initQueues(ch, *conf.Exchanges)
-			//	if err != nil {
-			//		return nil, fmt.Errorf("amqpclient - New - initQueues: %w", err)
-			//	}
-			//}
+
 			err = initQueues(ch, conf.Exchanges)
 			if err != nil {
 				return nil, fmt.Errorf("amqpclient - New - initQueues: %w", err)
@@ -54,7 +48,7 @@ func New(conf Config) (*Amqp, error) {
 
 			return &Amqp{conn: conn, channel: ch}, nil
 		}
-		slog.Info("Amqp is trying to connect, attempts left: %d", connAttempts)
+		fmt.Printf("Amqp is trying to connect, attempts left: %d\n", connAttempts)
 		time.Sleep(time.Second)
 		connAttempts--
 	}
@@ -109,10 +103,10 @@ func initQueues(ch *amqp091.Channel, exchanges []Exchange) error {
 
 func (a *Amqp) Publish(ctx context.Context, exchange, routingKey string, msg []byte) error {
 	// Publish the message to the exchange
-	cont, cancel := context.WithTimeout(ctx, 3*time.Second)
-	defer cancel()
+	//ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
+	//defer cancel()
 	err := a.channel.PublishWithContext(
-		cont,
+		ctx,
 		exchange,   // exchange name
 		routingKey, // routing key
 		false,      // mandatory

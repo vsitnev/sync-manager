@@ -103,7 +103,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/v1.messageCreateResponseDto"
+                            "$ref": "#/definitions/service.SendMessageResponse"
                         }
                     },
                     "400": {
@@ -147,7 +147,198 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Message"
+                            "$ref": "#/definitions/dto.Message"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v1.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/sources": {
+            "get": {
+                "description": "Source",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sources / Источники"
+                ],
+                "summary": "Список элементов \"Источник\"",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "sort_type",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.sourceResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v1.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.errorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Source",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sources / Источники"
+                ],
+                "summary": "Создание элемента \"Источник\"",
+                "parameters": [
+                    {
+                        "description": "sources",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.sourceCreateRequestDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Source"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v1.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/sources/{id}": {
+            "get": {
+                "description": "Source",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sources / Источники"
+                ],
+                "summary": "Получение элемента \"Источник\" по id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Source ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Source"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/v1.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/v1.errorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Source",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sources / Источники"
+                ],
+                "summary": "Изменение элемента \"Источник\" по id",
+                "parameters": [
+                    {
+                        "description": "source",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.updateSourceInput"
+                        }
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Source ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.updateSourceInput"
                         }
                     },
                     "400": {
@@ -167,6 +358,103 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "dto.AmqpMessage": {
+            "type": "object",
+            "required": [
+                "created",
+                "data",
+                "message_id",
+                "operation",
+                "source"
+            ],
+            "properties": {
+                "created": {
+                    "type": "integer"
+                },
+                "data": {},
+                "message_id": {
+                    "type": "string"
+                },
+                "operation": {
+                    "type": "string"
+                },
+                "source": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.Message": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "dead": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "message": {
+                    "$ref": "#/definitions/dto.AmqpMessage"
+                },
+                "retried": {
+                    "type": "boolean"
+                },
+                "routing": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.Route": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.Source": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "receive_method": {
+                    "type": "string"
+                },
+                "routes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.Route"
+                    }
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
         "model.AmqpMessage": {
             "type": "object",
             "required": [
@@ -192,26 +480,15 @@ const docTemplate = `{
                 }
             }
         },
-        "model.Message": {
+        "service.SendMessageResponse": {
             "type": "object",
             "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "dead": {
+                "error": {},
+                "save": {
                     "type": "boolean"
                 },
-                "id": {
-                    "type": "integer"
-                },
-                "message": {
-                    "$ref": "#/definitions/model.AmqpMessage"
-                },
-                "retried": {
+                "sent": {
                     "type": "boolean"
-                },
-                "routing": {
-                    "type": "string"
                 }
             }
         },
@@ -241,21 +518,77 @@ const docTemplate = `{
                 }
             }
         },
-        "v1.messageCreateResponseDto": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"
-                }
-            }
-        },
         "v1.messageResponse": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/model.Message"
+                        "$ref": "#/definitions/dto.Message"
+                    }
+                }
+            }
+        },
+        "v1.sourceCreateRequestDto": {
+            "type": "object",
+            "required": [
+                "code",
+                "description",
+                "name",
+                "receive_method",
+                "routes"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "receive_method": {
+                    "type": "string"
+                },
+                "routes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.Route"
+                    }
+                }
+            }
+        },
+        "v1.sourceResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.Source"
+                    }
+                }
+            }
+        },
+        "v1.updateSourceInput": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "receive_method": {
+                    "type": "string"
+                },
+                "routes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.Route"
                     }
                 }
             }

@@ -8,8 +8,8 @@ import (
 )
 
 func StartConsumers(amqp *amqpclient.Amqp, services *service.Services) error {
-	_, err := NewMessageConsumer(amqp, func(ctx context.Context, message model.AmqpMessage) error {
-		return services.AmqpMessage.SaveFromAmqp(ctx, message)
+	_, err := NewMessageConsumer(amqp, func(ctx context.Context, message []model.Message) error {
+		return services.Message.SaveMessages(ctx, message)
 	})
 	return err
 }

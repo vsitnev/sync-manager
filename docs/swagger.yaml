@@ -1,4 +1,69 @@
 definitions:
+  dto.AmqpMessage:
+    properties:
+      created:
+        type: integer
+      data: {}
+      message_id:
+        type: string
+      operation:
+        type: string
+      source:
+        type: string
+    required:
+    - created
+    - data
+    - message_id
+    - operation
+    - source
+    type: object
+  dto.Message:
+    properties:
+      created_at:
+        type: string
+      dead:
+        type: boolean
+      id:
+        type: integer
+      message:
+        $ref: '#/definitions/dto.AmqpMessage'
+      retried:
+        type: boolean
+      routing:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  dto.Route:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      url:
+        type: string
+    type: object
+  dto.Source:
+    properties:
+      code:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      receive_method:
+        type: string
+      routes:
+        items:
+          $ref: '#/definitions/dto.Route'
+        type: array
+      updated_at:
+        type: string
+    type: object
   model.AmqpMessage:
     properties:
       created:
@@ -17,20 +82,13 @@ definitions:
     - operation
     - source
     type: object
-  model.Message:
+  service.SendMessageResponse:
     properties:
-      created_at:
-        type: string
-      dead:
+      error: {}
+      save:
         type: boolean
-      id:
-        type: integer
-      message:
-        $ref: '#/definitions/model.AmqpMessage'
-      retried:
+      sent:
         type: boolean
-      routing:
-        type: string
     type: object
   v1.errorResponse:
     properties:
@@ -49,16 +107,54 @@ definitions:
     - message
     - routing
     type: object
-  v1.messageCreateResponseDto:
-    properties:
-      id:
-        type: integer
-    type: object
   v1.messageResponse:
     properties:
       data:
         items:
-          $ref: '#/definitions/model.Message'
+          $ref: '#/definitions/dto.Message'
+        type: array
+    type: object
+  v1.sourceCreateRequestDto:
+    properties:
+      code:
+        type: string
+      description:
+        type: string
+      name:
+        type: string
+      receive_method:
+        type: string
+      routes:
+        items:
+          $ref: '#/definitions/dto.Route'
+        type: array
+    required:
+    - code
+    - description
+    - name
+    - receive_method
+    - routes
+    type: object
+  v1.sourceResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dto.Source'
+        type: array
+    type: object
+  v1.updateSourceInput:
+    properties:
+      code:
+        type: string
+      description:
+        type: string
+      name:
+        type: string
+      receive_method:
+        type: string
+      routes:
+        items:
+          $ref: '#/definitions/dto.Route'
         type: array
     type: object
 info:
@@ -120,7 +216,7 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/v1.messageCreateResponseDto'
+            $ref: '#/definitions/service.SendMessageResponse'
         "400":
           description: Bad Request
           schema:
@@ -149,7 +245,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.Message'
+            $ref: '#/definitions/dto.Message'
         "400":
           description: Bad Request
           schema:
@@ -161,4 +257,129 @@ paths:
       summary: Получение элемента "Сообщение" по id
       tags:
       - Messages / Сообщения
+  /api/v1/sources:
+    get:
+      consumes:
+      - application/json
+      description: Source
+      parameters:
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - in: query
+        name: sort_type
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.sourceResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+      summary: Список элементов "Источник"
+      tags:
+      - Sources / Источники
+    post:
+      consumes:
+      - application/json
+      description: Source
+      parameters:
+      - description: sources
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/v1.sourceCreateRequestDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.Source'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+      summary: Создание элемента "Источник"
+      tags:
+      - Sources / Источники
+  /api/v1/sources/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Source
+      parameters:
+      - description: Source ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Source'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+      summary: Получение элемента "Источник" по id
+      tags:
+      - Sources / Источники
+    patch:
+      consumes:
+      - application/json
+      description: Source
+      parameters:
+      - description: source
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/v1.updateSourceInput'
+      - description: Source ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.updateSourceInput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+      summary: Изменение элемента "Источник" по id
+      tags:
+      - Sources / Источники
 swagger: "2.0"
